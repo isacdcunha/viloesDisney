@@ -1,75 +1,193 @@
-<script setup></script>
+<script setup>
+import { ref, computed  } from 'vue'
+
+const query = ref('')
+
+const perfumes = ref([
+  {
+    id: 1,
+    nome: 'Queen of Hearts',
+    imagem: 'https://bluebus-wp.s3.amazonaws.com/wp-content/uploads/2014/01/perfume-queens.jpg',
+    preco: 'R$ 199,90',
+  },
+  {
+    id: 2,
+    nome: 'Cruella de Vil',
+    imagem: 'https://bluebus-wp.s3.amazonaws.com/wp-content/uploads/2014/01/perfume-cruella.jpg',
+    preco: 'R$ 159,90',
+  },
+  {
+    id: 3,
+    nome: 'The Evil Queen',
+    imagem: 'https://i.pinimg.com/originals/cf/fb/f7/cffbf773ae092465590494b6de27afac.jpg',
+    preco: 'R$ 189,90',
+  },
+  {
+    id: 4,
+    nome: 'Doctor Facilier',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-28.jpg',
+    preco: 'R$ 199,90',
+  },
+  {
+    id: 5,
+    nome: 'Gaston',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-21.jpg',
+    preco: 'R$ 159,90',
+  },
+  {
+    id: 6,
+    nome: 'Hades',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-18.jpg',
+    preco: 'R$ 189,90',
+  },
+  {
+    id: 7,
+    nome: 'Mother Gothel',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-17.jpg',
+    preco: 'R$ 199,90',
+  },
+  {
+    id: 8,
+    nome: 'Maleficent',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-19.jpg',
+    preco: 'R$ 159,90',
+  },
+  {
+    id: 9,
+    nome: 'Ursula',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-30.jpg',
+    preco: 'R$ 189,90',
+  },
+  {
+    id: 10,
+    nome: 'Scar',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-26.jpg',
+    preco: 'R$ 199,90',
+  },
+  {
+    id: 11,
+    nome: 'Jafar',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-23.jpg',
+    preco: 'R$ 159,90',
+  },
+  {
+    id: 12,
+    nome: 'Captain Hook',
+    imagem:
+      'https://hilnethcorreia.com.br/wp-content/uploads/2019/06/perfumes-viloes-disney-22.jpg',
+    preco: 'R$ 189,90',
+  },
+])
+
+const filteredPerfumes = ref([...perfumes.value])
+
+function search() {
+  const searchTerm = query.value.trim().toLowerCase()
+
+  if (!searchTerm) {
+    filteredPerfumes.value = [...perfumes.value]
+  } else {
+    filteredPerfumes.value = perfumes.value.filter((perfume) =>
+      perfume.nome.toLowerCase().includes(searchTerm),
+    )
+  }
+
+  const perfumesSection = document.getElementById('perfumes')
+  if (perfumesSection) {
+    perfumesSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+const cart = ref([])
+const isCartOpen = ref(false)
+
+function addToCart(perfume) {
+  const existingProduct = cart.value.find((item) => item.id === perfume.id)
+
+  if (existingProduct) {
+    existingProduct.quantity++
+  } else {
+    cart.value.push({ ...perfume, quantity: 1 })
+  }
+}
+
+function toggleCart() {
+  isCartOpen.value = !isCartOpen.value
+}
+
+const totalPrice = computed(() => {
+  return cart.value.reduce((total, item) => {
+    const price = parseFloat(item.preco.replace('R$', '').replace(',', '.')) || 0
+    return total + price * item.quantity
+  }, 0)
+})
+</script>
 
 <template>
-  <header class="fixed top-0 left-0 w-full h-32 bg-white flex items-center px-4">
-    <h1 class="nome text-6xl mr-12 ml-5">Essência sombria</h1>
+ <header class="fixed top-0 left-0 w-full h-32 bg-white flex items-center px-8 shadow-sm">
+  <div class="flex items-center gap-8">
+    <h1 class="titulo text-6xl">Essência sombria</h1>
 
-    <div class="flex items-center px-4">
-      <img
-        width="25"
-        height="25"
-        src="https://img.icons8.com/ios-glyphs/60/user--v1.png"
-        alt="user--v1"
-      />
-      <div class="flex flex-col ml-2">
-        <p class="text-xs">Olá, visitante!</p>
-        <p class="text-xs">Entrar/Cadastrar</p>
+    <div class="flex items-center gap-6">
+      <!-- Login -->
+      <div class="flex items-center ml-10">
+        <img width="25" height="25" src="https://img.icons8.com/ios-glyphs/60/user--v1.png" alt="user" />
+        <div class="flex flex-col ml-2 text-xs">
+          <p>Olá, visitante!</p>
+          <p>Entrar/Cadastrar</p>
+        </div>
       </div>
-    </div>
 
-    <div class="flex items-center relative mx-10">
-      <div class="relative flex items-center">
+      <!-- Busca -->
+      <div class="relative ml-5">
         <input
           type="text"
           v-model="query"
           @input="search"
-          class="py-2 pl-4 pr-22 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          @keyup.enter="search"
           placeholder="Buscar..."
+          class="py-2 pl-4 pr-10 border border-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-78"
         />
         <svg
-          class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
           xmlns="http://www.w3.org/2000/svg"
-          width="10"
-          height="10"
+          width="20"
+          height="20"
           viewBox="0 0 256 256"
         >
           <g fill="#e0e0e0">
             <g transform="scale(5.12,5.12)">
-              <path
-                d="M21,3c-9.37891,0-17,7.62109-17,17c0,9.37891,7.62109,17,17,17c3.71094,0,7.14063-1.19531,9.9375-3.21875l13.15625,13.125l2.8125-2.8125l-13-13.03125c2.55469-2.97656,4.09375-6.83984,4.09375-11.0625c0-9.37891-7.62109-17-17-17zM21,5c8.29688,0,15,6.70313,15,15c0,8.29688-6.70312,15-15,15c-8.29687,0-15-6.70312-15-15c0-8.29687,6.70313-15,15-15z"
-              ></path>
+              <path d="M21,3c-9.37891,0-17,7.62109-17,17c0,9.37891,7.62109,17,17,17c3.71094,0,7.14063-1.19531,9.9375-3.21875l13.15625,13.125l2.8125-2.8125l-13-13.03125c2.55469-2.97656,4.09375-6.83984,4.09375-11.0625c0-9.37891-7.62109-17-17-17zM21,5c8.29688,0,15,6.70313,15,15c0,8.29688-6.70312,15-15,15c-8.29687,0-15-6.70312-15-15c0-8.29687,6.70313-15,15-15z"></path>
             </g>
           </g>
         </svg>
       </div>
 
-      <img
-        class="ml-20 w-8 h-8 text-gray-700"
-        width="30"
-        height="30"
-        src="https://img.icons8.com/ios-glyphs/60/whatsapp.png"
-        alt="whatsapp"
-      />
-
-      <div class="flex flex-col ml-2">
-        <p class="text-xs">WhatsApp SAC</p>
-        <p class="text-xs">(47) 99924-2591</p>
+      <!-- WhatsApp -->
+      <div class="flex items-center ml-10">
+        <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/60/whatsapp.png" alt="whatsapp" />
+        <div class="flex flex-col ml-2 text-xs">
+          <p>WhatsApp SAC</p>
+          <p>(47) 99924-2591</p>
+        </div>
       </div>
 
-      <img
-        width="30"
-        height="30"
-        src="https://img.icons8.com/ios-glyphs/30/shopping-cart--v1.png"
-        alt="shopping-cart--v1"
-        class="ml-20"
-      />
-      <div class="flex flex-col ml-2">
-        <p class="text-xs">Meu</p>
-        <p class="text-xs">carrinho</p>
+      <!-- Carrinho -->
+      <div class="flex items-center ml-12">
+        <img width="30" height="30" src="https://img.icons8.com/ios-glyphs/30/shopping-cart--v1.png" alt="carrinho" />
+        <button @click="toggleCart" class="ml-2 text-sm hover:underline">Meu carrinho</button>
       </div>
     </div>
-  </header>
-
+  </div>
+</header>
   <main class="pt-32">
     <div class="bg-gray-300 w-full py-24">
       <!-- Quadrado Cinza -->
@@ -117,6 +235,74 @@
         <div class="bg-gray-300 p-6 rounded-xl shadow-md flex-1 py-32"></div>
       </div>
     </div>
+
+    <div class="w-full h-10 bg-white flex items-center px-4 flex-col">
+      <h2 class="titulo flex item-center text-5xl">Encontre o seu cheiro</h2>
+      <p class="fonte text-md">Exale o charme sombrio dos vilões da Disney!</p>
+    </div>
+
+    <div class="bg-white flex items-center w-full mt-20 justify-center mb-20" id="perfumes">
+      <div class="flex flex-wrap gap-x-40 gap-y-15 justify-center">
+        <div v-if="filteredPerfumes.length === 0" class="w-full text-center text-lg text-gray-500">
+          <p>Nenhum perfume encontrado</p>
+        </div>
+
+        <div
+          v-for="perfume in filteredPerfumes"
+          :key="perfume.id"
+          class="bg-white p-4 rounded-lg w-64"
+        >
+        <div class="flex flex-col items-center text-center">
+          <img :src="perfume.imagem" alt="" class="w-full h-56 object-cover rounded-md" />
+          <h2 class="text-lg font-bold mt-4 fonte">{{ perfume.nome }}</h2>
+          <p class="text-gray-500 font-semibold fonte">{{ perfume.preco }}</p>
+        </div>
+
+        <div class="items-center text-center">
+          <button
+  @click="addToCart(perfume)"
+  class="relative fonte mt-2 bg-black text-white py-2 px-4 rounded-lg overflow-hidden group hover:rounded-none"
+>
+  Adicionar ao carrinho
+  <span class="absolute bottom-1 left-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-[0.9] transition-all duration-500"></span>
+</button>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div v-if="isCartOpen" class="fixed top-32 right-5 w-80 bg-white border rounded-lg shadow-lg p-4 z-50">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold fonte">Meu Carrinho</h2>
+    <button @click="toggleCart" class="text-gray-500 hover:text-black text-2xl">&times;</button>
+  </div>
+
+  <div v-if="cart.length === 0" class="text-gray-500 fonte">Carrinho vazio</div>
+
+  <div v-else>
+    <div v-for="item in cart" :key="item.id" class="flex justify-between items-center mb-2">
+      <div>
+        <p class="font-semibold fonte">{{ item.nome }}</p>
+        <p class="text-sm text-gray-500 fonte">Qtd: {{ item.quantity }}</p>
+      </div>
+      <p class="font-semibold fonte">{{ item.preco }}</p>
+    </div>
+
+    <div class="mt-4 border-t pt-2 flex justify-between">
+      <span class="font-semibold fonte">Total:</span>
+      <span class="font-semibold fonte">R$ {{ totalPrice.toFixed(2).replace('.', ',') }}</span>
+    </div>
+
+    <button
+      class="mt-4 w-full bg-black text-white py-2 rounded fonte font-semibold hover:bg-red-700 transition"
+      @click="cart = []"
+    >
+      Limpar Carrinho
+    </button>
+  </div>
+</div>
+
   </main>
 </template>
 
@@ -124,7 +310,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Italianno&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-.nome {
+.titulo {
   font-family: Italianno, serif;
 }
 
